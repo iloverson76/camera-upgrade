@@ -1,5 +1,6 @@
 package bean;
 
+import com.google.common.io.ByteArrayDataInput;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -11,7 +12,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Msg {
 
-    private Head head;
+    private Header header;
 
-    private Data data;
+    private ByteArrayDataInput dataInput;
 }

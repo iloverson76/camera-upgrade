@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @Accessors(chain = true)
-public class Head implements Serializable {
+public class Header implements Serializable {
 
     private static final long serialVersionUID = 6776721485184922437L;
 
