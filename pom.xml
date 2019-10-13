@@ -10,9 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>file-upload</module>
         <module>file-transfer</module>
-        <module>tlv-codec</module>
     </modules>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok-maven -->
@@ -39,7 +37,21 @@
             <artifactId>guava</artifactId>
             <version>27.0-jre</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.11</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.11</version>
+        </dependency>
     </dependencies>
 
 </project>

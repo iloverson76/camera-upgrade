@@ -1,9 +1,9 @@
-import com.sun.security.ntlm.Server;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Date;
 
 import static com.sun.corba.se.impl.orbutil.ORBUtility.bytesToInt;
@@ -11,6 +11,7 @@ import static com.sun.corba.se.impl.orbutil.ORBUtility.bytesToInt;
 /**
  * 服务端
  */
+@Slf4j
 public class UpgradeServer {
 
     public static void main(String[] args) {
@@ -18,7 +19,7 @@ public class UpgradeServer {
         try {
             //新建一个服务端ServerSocket,端口号为8888
             serverSocket = new ServerSocket(8888);
-            System.out.println("等待客户端连接!");
+            log.info ( "等待客户端连接!" );
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -29,7 +30,6 @@ public class UpgradeServer {
                     //监听客户端的连接
                     socket = serverSocket.accept();
                     System.out.println("["+new Date()+"]客户端 " + socket.getInetAddress().getHostAddress() + " 连接成功！");
-
                     //开启客户端接收信息线程
                     new Thread(new ReceiveThreat(socket)).start();
                     //开始客户端发送信息线程
@@ -113,7 +113,7 @@ class ReceiveThreat implements Runnable {
 
                     //获取指令
                     if(seq==cmdSeq){
-                        cmdHex=InteractionUtil.bytesToStrHex(buf);
+                        cmdHex=InteractionUtil.bytesToHexString(buf);
                         System.out.println("-> COMMAND[Hex]:"+cmdHex);
                     }
 
@@ -149,7 +149,7 @@ class ReceiveThreat implements Runnable {
  */
 class SendThreat implements Runnable {
     Socket socket;
-    //使用BufferedWriter流来向客户端发送信息
+    //使用BufferedWriter流向客户端发送信息
     BufferedOutputStream bio;
 
     public SendThreat(Socket socket) {

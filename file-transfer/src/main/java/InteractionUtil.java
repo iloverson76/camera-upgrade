@@ -7,6 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,29 +74,52 @@ public class InteractionUtil {
 
         String methodName= cmdMethodMap.get(cmdHex);
 
-        System.out.println(">>>开始执行动作:"+methodName);
+        log.info ( ">>>开始执行动作:"+methodName );
 
         try {
-            InteractionUtil.class.getMethod(methodName,
-                    Class.forName("java.lang.String"),Class.forName("java.lang.StringBuffer"))
-                    .invoke(cmdHex,busiData);
-
+            Class.forName ( "InteractionUtil" ).getMethod ( methodName ).invoke ( cmdHex,busiData );
         } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
 
-    //获取文件
-    public FileInputStream uploadPackFromServer(String dir,String fileName){
-        System.out.println(">>>开始获取文件"+fileName);
-        FileInputStream in=null;
+    public FileInputStream uploadFile(String dir,String fileName){
+
+        log.info(">>>开始获取文件{},{}",dir,fileName);
+
+        FileInputStream fis=null;
         try {
-            in= new FileInputStream(new File(dir+fileName));
+            fis= new FileInputStream(new File ( dir+fileName ));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            e.printStackTrace ();
         }
-        System.out.println(">>>成功");
-        return in;
+        return fis;
+    }
+
+    /**
+     * 文件流转字节数组
+     * @param fis
+     * @return
+     */
+    public byte[] getFileToByte(FileInputStream fis) {
+       log.info ( ">>>开始文件转字节" );
+        byte[] by=null;
+        ByteArrayOutputStream bytestream=null;
+        try {
+            bytestream = new ByteArrayOutputStream();
+            byte[] bb = new byte[1024];
+            int ch;
+            ch = fis.read(bb);
+            while (ch != -1) {
+                bytestream.write(bb, 0, ch);
+                ch = fis.read(bb);
+            }
+            bytestream.flush ();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        log.info(">>>完成");
+        return  bytestream.toByteArray();
     }
 
     //2.2.1 获取设备版本信息(client)
@@ -105,6 +129,7 @@ public class InteractionUtil {
      * @param cmd
      */
     public void pushDeviceVersionInfo(String cmd,StringBuffer sb) {
+
 
     }
 
@@ -171,7 +196,7 @@ public class InteractionUtil {
      * @param b
      * @return
      */
-    public static String bytesToStrHex(byte[] b) {
+    public static String bytesToHexString(byte[] b) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < b.length; i++) {
             sb.append(String.format("%02x", b[i]));
