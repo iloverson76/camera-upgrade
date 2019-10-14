@@ -23,6 +23,21 @@ public class Header implements Serializable {
     /**
      * COMMAND
      */
-    private int command;
+    private byte[] commandHex;
 
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public byte[] getCommandHex() {
+        return commandHex;
+    }
+
+    public void setCommandHex(byte[] commandHex) {
+        this.commandHex = commandHex;
+    }
 }
