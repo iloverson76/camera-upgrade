@@ -6,12 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="file-transfer" />
-        <module name="tlv-codec" />
+        <module name="camera-upgrade" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="file-upload" target="1.5" />
+      <module name="tlv-codec" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

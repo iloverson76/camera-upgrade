@@ -2,17 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba6cc0f8-f2b7-4708-b9a3-cfec535ed7ef" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/camera-upgrade/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/camera-upgrade/src/main/java/com/gzrock/UpgradeServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/camera-upgrade/src/main/resources/log4j.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/camera-upgrade/target/classes/InteractionUtil.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/camera-upgrade/target/classes/ReceiveThreat.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/camera-upgrade/target/classes/UpgradeServer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/InteractionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/src/main/java/InteractionUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/UpgradeServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/src/main/java/UpgradeServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/bean/BusiData.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/src/main/java/bean/BusiData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/bean/Header.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/src/main/java/bean/Header.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/bean/Msg.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/src/main/java/bean/UpgradeMsg.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/InteractionUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/target/classes/InteractionUtil.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/ReceiveThreat.class" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/target/classes/ReceiveThreat.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/SendThreat.class" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/target/classes/SendThreat.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/UpgradeServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/file-transfer/target/classes/UpgradeServer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/.idea/java.iml" beforeDir="false" afterPath="$PROJECT_DIR$/camera-upgrade/src/main/java/.idea/java.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/camera-upgrade/src/main/java/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/camera-upgrade/src/main/java/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/camera-upgrade/src/main/java/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/InteractionUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/camera-upgrade/src/main/java/com/gzrock/InteractionUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/UpgradeServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/bean/BusiData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/bean/Header.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/java/bean/UpgradeMsg.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/src/main/resources/logback-spring.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/InteractionUtil.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/ReceiveThreat.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/SendThreat.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-transfer/target/classes/UpgradeServer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +75,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="extract.method.default.visibility" value="private" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/camera-upgrade" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -83,7 +96,12 @@
       <recent name="" />
       <recent name="java" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\IdeaProjects\camera-upgradation\file-transfer" />
+      <recent name="E:\IdeaProjects\camera-upgradation\resources" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\IdeaProjects\camera-upgradation\file-transfer\src\main\resources" />
       <recent name="E:\IdeaProjects\camera-upgradation\file-transfer\src\main\java" />
     </key>
   </component>
@@ -101,9 +119,56 @@
   </component>
   <component name="RunManager">
     <configuration name="UpgradeServer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="UpgradeServer" />
-      <module name="file-transfer" />
-      <option name="PROGRAM_PARAMETERS" value="E:\upgrade 8888" />
+      <option name="MAIN_CLASS_NAME" value="com.gzrock.UpgradeServer" />
+      <module name="camera-upgrade" />
+      <option name="PROGRAM_PARAMETERS" value="D:\\upgrade\\ 504.app.C_800.tar.bz2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
+      <module name="camera-upgradation-parent" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
+      <module name="camera-upgradation-parent" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -131,7 +196,7 @@
       <workItem from="1570689275024" duration="26463000" />
       <workItem from="1570758618725" duration="40885000" />
       <workItem from="1570866665732" duration="2800000" />
-      <workItem from="1570869978975" duration="53496000" />
+      <workItem from="1570869978975" duration="88174000" />
     </task>
     <task id="LOCAL-00001" summary="接收客户端报文">
       <created>1570885026165</created>
@@ -140,7 +205,14 @@
       <option name="project" value="LOCAL" />
       <updated>1570885026165</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="流程跑通">
+      <created>1571055390639</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1571055390639</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -159,7 +231,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="接收客户端报文" />
-    <option name="LAST_COMMIT_MESSAGE" value="接收客户端报文" />
+    <MESSAGE value="流程跑通" />
+    <option name="LAST_COMMIT_MESSAGE" value="流程跑通" />
   </component>
   <component name="WindowStateProjectService">
     <state x="491" y="55" key="#Custom_Plugin_Repositories" timestamp="1571018543514">
@@ -170,22 +243,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="452" y="96" key="#Notifications/0.0.1920.1040@0.0.1920.1040" timestamp="1571014106867" />
-    <state x="452" y="96" key="#Project_Structure" timestamp="1570880369963">
+    <state x="452" y="96" key="#Project_Structure" timestamp="1571138987006">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="96" key="#Project_Structure/0.0.1920.1040@0.0.1920.1040" timestamp="1570880369963" />
-    <state x="104" y="150" width="1159" height="653" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1570690588621">
+    <state x="452" y="96" key="#Project_Structure/0.0.1920.1040@0.0.1920.1040" timestamp="1571138987006" />
+    <state x="297" y="117" width="1159" height="653" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1571136400660">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="104" y="150" width="1159" height="653" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1570690588621" />
+    <state x="297" y="117" width="1159" height="653" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1571136400660" />
     <state x="446" y="153" key="#com.intellij.ide.macro.MacrosDialog" timestamp="1570677296469">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="446" y="153" key="#com.intellij.ide.macro.MacrosDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1570677296469" />
-    <state x="721" y="129" key="#com.intellij.ide.util.MemberChooser" timestamp="1571036536505">
+    <state x="721" y="129" key="#com.intellij.ide.util.MemberChooser" timestamp="1571135397423">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="721" y="129" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1571036536505" />
+    <state x="721" y="129" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1571135397423" />
     <state x="628" y="246" key="#com.intellij.ide.util.PackageChooserDialog" timestamp="1570531969508">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -198,82 +271,86 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="678" y="371" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.packages/0.0.1920.1040@0.0.1920.1040" timestamp="1570531993046" />
-    <state x="647" y="189" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog" timestamp="1570690755249">
+    <state x="647" y="189" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog" timestamp="1571135731307">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="647" y="189" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1570690755249" />
+    <state x="647" y="189" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1571135731307" />
     <state x="657" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1570773080226">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="657" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1570773080226" />
-    <state width="1063" height="700" key="DebuggerActiveHint" timestamp="1571051733543">
+    <state width="1063" height="700" key="DebuggerActiveHint" timestamp="1571133028985">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1063" height="700" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1571051733543" />
+    <state width="1063" height="700" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1571133028985" />
     <state x="454" y="326" key="EnvironmentVariablesDialog" timestamp="1570677006561">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="454" y="326" key="EnvironmentVariablesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1570677006561" />
-    <state x="592" y="113" key="FileChooserDialogImpl" timestamp="1571020985981">
+    <state x="592" y="113" key="FileChooserDialogImpl" timestamp="1571139436557">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="592" y="113" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1571020985981" />
-    <state width="1868" height="384" key="GridCell.Tab.0.bottom" timestamp="1571054842532">
+    <state x="592" y="113" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1571139436557" />
+    <state width="1868" height="356" key="GridCell.Tab.0.bottom" timestamp="1571139452258">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="384" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1571054842532" />
-    <state width="1868" height="384" key="GridCell.Tab.0.center" timestamp="1571054842532">
+    <state width="1868" height="356" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452258" />
+    <state width="1868" height="356" key="GridCell.Tab.0.center" timestamp="1571139452257">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="384" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1571054842532" />
-    <state width="1868" height="384" key="GridCell.Tab.0.left" timestamp="1571054842532">
+    <state width="1868" height="356" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452257" />
+    <state width="1868" height="356" key="GridCell.Tab.0.left" timestamp="1571139452257">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="384" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1571054842532" />
-    <state width="1868" height="384" key="GridCell.Tab.0.right" timestamp="1571054842532">
+    <state width="1868" height="356" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452257" />
+    <state width="1868" height="356" key="GridCell.Tab.0.right" timestamp="1571139452258">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="384" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1571054842532" />
-    <state width="1868" height="68" key="GridCell.Tab.1.bottom" timestamp="1571054830540">
+    <state width="1868" height="356" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452258" />
+    <state width="1868" height="276" key="GridCell.Tab.1.bottom" timestamp="1571139452252">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="68" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1571054830540" />
-    <state width="1868" height="68" key="GridCell.Tab.1.center" timestamp="1571054830540">
+    <state width="1868" height="276" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452252" />
+    <state width="1868" height="276" key="GridCell.Tab.1.center" timestamp="1571139452250">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="68" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1571054830540" />
-    <state width="1868" height="68" key="GridCell.Tab.1.left" timestamp="1571054830539">
+    <state width="1868" height="276" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452250" />
+    <state width="1868" height="276" key="GridCell.Tab.1.left" timestamp="1571139452248">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="68" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1571054830539" />
-    <state width="1868" height="68" key="GridCell.Tab.1.right" timestamp="1571054830540">
+    <state width="1868" height="276" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452248" />
+    <state width="1868" height="276" key="GridCell.Tab.1.right" timestamp="1571139452251">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1868" height="68" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1571054830540" />
+    <state width="1868" height="276" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1571139452251" />
     <state x="377" y="94" key="Maven.ArtifactSearchDialog" timestamp="1570529993376">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="377" y="94" key="Maven.ArtifactSearchDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1570529993376" />
-    <state x="218" y="43" width="1328" height="913" key="SettingsEditor" timestamp="1571021192194">
+    <state x="588" y="167" key="MultipleFileMergeDialog" timestamp="1571101235461">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="218" y="43" width="1328" height="913" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1571021192194" />
-    <state x="452" y="190" key="Vcs.Push.Dialog.v2" timestamp="1571014086242">
+    <state x="588" y="167" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1571101235461" />
+    <state x="218" y="43" width="1328" height="913" key="SettingsEditor" timestamp="1571137487184">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="452" y="190" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1571014086242" />
+    <state x="218" y="43" width="1328" height="913" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1571137487184" />
+    <state x="452" y="190" key="Vcs.Push.Dialog.v2" timestamp="1571055394188">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="452" y="190" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1571055394188" />
     <state x="202" y="91" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1570676610702">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="202" y="91" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1570676610702" />
-    <state x="380" y="196" width="1159" height="735" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1571045018712">
+    <state x="380" y="196" width="1159" height="735" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1571126551518">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="380" y="196" width="1159" height="735" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1920.1040@0.0.1920.1040" timestamp="1571045018712" />
-    <state x="627" y="237" key="extract.method.dialog" timestamp="1571054687060">
+    <state x="380" y="196" width="1159" height="735" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1920.1040@0.0.1920.1040" timestamp="1571126551518" />
+    <state x="627" y="237" key="extract.method.dialog" timestamp="1571137193093">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="627" y="237" key="extract.method.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1571054687060" />
+    <state x="627" y="237" key="extract.method.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1571137193093" />
     <state x="478" y="29" width="1042" height="981" key="find.popup" timestamp="1570878321870">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -286,23 +363,18 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="457" y="254" width="1108" height="571" key="new project wizard/0.0.1920.1040@0.0.1920.1040" timestamp="1570607129464" />
-    <state x="539" y="5" width="840" height="1034" key="search.everywhere.popup" timestamp="1571048688602">
+    <state x="538" y="129" width="840" height="829" key="search.everywhere.popup" timestamp="1571136392240">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="539" y="5" width="840" height="1034" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1571048688602" />
+    <state x="538" y="129" width="840" height="829" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1571136392240" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint type="java-line">
-          <url>file://$PROJECT_DIR$/file-transfer/src/main/java/InteractionUtil.java</url>
-          <line>126</line>
-          <option name="timeStamp" value="45" />
-        </line-breakpoint>
-        <line-breakpoint type="java-line">
-          <url>file://$PROJECT_DIR$/file-transfer/src/main/java/InteractionUtil.java</url>
-          <line>170</line>
-          <option name="timeStamp" value="48" />
+          <url>file://$PROJECT_DIR$/camera-upgrade/src/main/java/com/gzrock/InteractionUtil.java</url>
+          <line>321</line>
+          <option name="timeStamp" value="65" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
