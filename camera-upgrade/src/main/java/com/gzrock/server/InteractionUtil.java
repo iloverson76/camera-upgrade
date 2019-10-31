@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Setter
 @Builder
 @Accessors(chain = true)
+@Slf4j
 public class InteractionUtil {
 
     /**
@@ -70,7 +72,6 @@ public class InteractionUtil {
      * 客户端指令(k):(v)服务端动作
      */
     private static final Map<Integer, String> cmdMethodMap = new HashMap<Integer, String>();
-    public static Log logger = LogFactory.getLog(InteractionUtil.class);
     /**
      * 文件路径
      */
@@ -150,9 +151,12 @@ public class InteractionUtil {
      * @param cmd
      */
     public static byte[] pushDeviceVersionInfo(Integer cmd, StringBuffer sb) {
-        logger.info(">返回设备版本信息-请求指令[" + Integer.toHexString(cmd) + "] 应答指令[" +  Integer.toHexString(CMD_VERSION_RESPONSE) + "]");
+        log.info(">返回设备版本信息-请求指令[0x" + Integer.toHexString(cmd) + "] 应答指令[0x" +  Integer.toHexString(CMD_VERSION_RESPONSE) + "]");
+        log.info("接收DATA:"+sb.toString());
         String origStr = sb.toString();
         String[] origStrArr = origStr.split("\n");
+        Integer deviceVersion=Integer.valueOf(origStrArr[2].split(":")[1]);
+        log.info("设备当前版本:"+deviceVersion);
         byte[] valRet = validateVersion(Integer.valueOf(origStrArr[2].split(":")[1]));
         if (null != valRet) return valRet;
         StringBuffer dataBuf = new StringBuffer();
@@ -164,6 +168,7 @@ public class InteractionUtil {
                 .append(":")
                 .append(fileName)//升级版本号要大于客户端传过来的版本号501>500
                 .append("\n");
+        log.info("应答报文:"+dataBuf.toString());
         return getBytesWithoutFile(CMD_VERSION_RESPONSE, dataBuf);
     }
 
@@ -175,7 +180,7 @@ public class InteractionUtil {
      * @param cmd
      */
     public static byte[] transferFile(Integer cmd) {
-        logger.info(">开始传送文件,应答指令[" + Integer.toHexString(cmd) + "]");
+        log.info(">开始传送文件,应答指令[0x" + Integer.toHexString(cmd) + "]");
         byte[] fileBytes = fileToByte(uploadFile());
         return getBytesWithFile(cmd, fileBytes);
     }
@@ -188,7 +193,8 @@ public class InteractionUtil {
      * @return
      */
     public static byte[] packReceiveAckHandle(Integer cmd, StringBuffer sb) {
-        logger.info(">接收文件应答-请求指令[" + Integer.toHexString(cmd) + "]");
+        log.info(">接收文件应答-请求指令[0x" + Integer.toHexString(cmd) + "]");
+        log.info("接收DATA:"+sb.toString());
         String resultStr = sb.toString();
         if (resultStr.contains(RECEIVE_FILE_COMPLETED)) {
             return RECEIVE_FILE_COMPLETED.getBytes();
@@ -209,7 +215,7 @@ public class InteractionUtil {
      * @return
      */
     public static byte[] getBytesWithoutFile(Integer cmd, StringBuffer dataBuf) {
-        logger.info(">返回报文,不包含文件字节流");
+        log.info(">返回报文,不包含文件字节流");
         byte[] resultByte = null;
         StringBuffer retSb = new StringBuffer();
         try {
@@ -234,7 +240,7 @@ public class InteractionUtil {
      * @return
      */
     private static byte[] getBytesWithFile(Integer cmd, byte[] fileBytes) {
-        logger.info(">返回文件字节流报文");
+        log.info(">返回文件字节流报文");
         byte[] resultByte = null;
         try {
             Integer dataLength = fileBytes.length;
@@ -271,10 +277,10 @@ public class InteractionUtil {
      */
     public static FileInputStream uploadFile() {
         if ("" == filePath || "" == fileName) {
-            logger.info(">文件路径或文件名不存在!");
+            log.info(">文件路径或文件名不存在!");
             return null;
         }
-        logger.info(">开始获取文件" + filePath + fileName);
+        log.info(">开始获取文件" + filePath + fileName);
         FileInputStream in = null;
         try {
             in = new FileInputStream(file);
@@ -291,7 +297,7 @@ public class InteractionUtil {
      * @return
      */
     public static byte[] fileToByte(FileInputStream in) {
-        logger.info(">文件输入流转字节数组");
+        log.info(">文件输入流转字节数组");
         ByteArrayOutputStream bytestream = null;
         try {
             bytestream = new ByteArrayOutputStream();
@@ -314,11 +320,11 @@ public class InteractionUtil {
     public static byte[] validateVersion(Integer deviceVersion) {
         int currentVersion = Integer.valueOf(fileName.split("\\.")[0]);
         if (currentVersion <= deviceVersion) {
-            logger.info("没有新版本");
+            log.info("没有新版本");
             StringBuffer sb = new StringBuffer();
             return getBytesWithoutFile(CMD_VERSION_RESPONSE, sb.append("none"));
         }
-        logger.info("有可升级版本:" + currentVersion);
+        log.info("有可升级版本:" + currentVersion);
         return null;
     }
 
@@ -329,7 +335,7 @@ public class InteractionUtil {
      * @return
      */
     public static int byteArray2Int(byte[] b) {
-        logger.info(">字节转整数");
+        log.info(">字节转整数");
         return ((b[0] & 0xFF) << 24)
                 | ((b[1] & 0xFF) << 16)
                 | ((b[2] & 0xFF) << 8)
@@ -344,7 +350,7 @@ public class InteractionUtil {
      * @return
      */
     public static byte[] intToByteArray(Integer integer) {
-        logger.info(">整数转字节");
+        log.info(">整数转字节");
         int byteNum = (40 - Integer.numberOfLeadingZeros(integer < 0 ? ~integer : integer)) / 8;
         byte[] byteArray = new byte[4];
         for (int n = 0; n < byteNum; n++)
@@ -358,7 +364,8 @@ public class InteractionUtil {
      * @param cmd
      */
     public byte[] answerUpgrdeRequest(Integer cmd, StringBuffer sb) {
-        logger.info(">应答升级文件请求-请求指令[" + Integer.toHexString(cmd) + "]应答指令[" + Integer.toHexString(CMD_UPGRADE_RESULT_RESPONSE) + "]");
+        log.info(">应答升级文件请求-请求指令[" + Integer.toHexString(cmd) + "]应答指令[" + Integer.toHexString(CMD_UPGRADE_RESPONSE) + "]");
+        log.info("接收DATA:"+sb.toString());
         String origStr = sb.toString();
         String[] origStrArr = origStr.split("\n");
         if ("none".equalsIgnoreCase(origStrArr[2].split(":")[1])) {
@@ -377,7 +384,8 @@ public class InteractionUtil {
                 .append(":")
                 .append(caculateMD5(uploadFile()))
                 .append("\n");
-        return getBytesWithoutFile(CMD_UPGRADE_RESULT_RESPONSE, dataBuf);
+        log.info("应答报文:"+sb.toString());
+        return getBytesWithoutFile(CMD_UPGRADE_RESPONSE, dataBuf);
     }
 
     /**
@@ -386,7 +394,8 @@ public class InteractionUtil {
      * @param cmd
      */
     public byte[] answerUpgradeResultRequest(Integer cmd, StringBuffer dataBuf) {
-        logger.info(">应答升级文件请求-请求指令[" + Integer.toHexString(cmd) + "]应答指令[" + Integer.toHexString(CMD_UPGRADE_RESULT_RESPONSE) + "]");
+        log.info(">应答升级文件请求-请求指令[" + Integer.toHexString(cmd) + "]应答指令[" + Integer.toHexString(CMD_UPGRADE_RESULT_RESPONSE) + "]");
+        log.info("接收DATA:"+dataBuf.toString());
         String origStr = dataBuf.toString();
         String[] origStrArr = origStr.split("\n");
         StringBuffer dataSb = new StringBuffer();
@@ -398,6 +407,7 @@ public class InteractionUtil {
                 .append(":")
                 .append("ok")
                 .append("\n");
+        log.info("应答报文:"+dataSb.toString());
         return getBytesWithoutFile(CMD_UPGRADE_RESULT_RESPONSE, dataSb);
     }
 
@@ -416,7 +426,7 @@ public class InteractionUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        logger.info(">计算文件md5值:" + md5);
+        log.info(">计算文件md5值:" + md5);
         return md5;
     }
 }
