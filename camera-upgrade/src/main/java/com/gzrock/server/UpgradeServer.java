@@ -36,7 +36,7 @@ public class UpgradeServer {
         //文件名匹配正则校验
         if (null == args[2] || "".equals(args[2]) || !args[2].contains("tar.bz2")) {
             try {
-                throw new Exception("文件名不能为空并且文件名必须符合此格式:[app:501.app.C_800.tar.bz2]");
+                throw new Exception("文件名不能为空并且文件名必须符合此格式:[504.app.C_800.tar.bz2]");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -91,7 +91,7 @@ public class UpgradeServer {
                 //开启客户端接收信息线程
                 new Thread(new ReceiveThreat(socket)).start();
                 //开始客户端发送信息线程
-               // new Thread(new SendThreat(socket)).start();
+                // new Thread(new SendThreat(socket)).start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -110,7 +110,7 @@ class ReceiveThreat implements Runnable {
     private Socket socket;
     private BufferedInputStream reader;
     private BufferedOutputStream writer = null;
-    private InteractionUtil interactionUtil=null;
+    private InteractionUtil interactionUtil = null;
 
     public ReceiveThreat(Socket socket) {
         super();
@@ -121,7 +121,7 @@ class ReceiveThreat implements Runnable {
             writer = new BufferedOutputStream(socket.getOutputStream());
             running = true;
             readable = true;
-            interactionUtil=new InteractionUtil();
+            interactionUtil = new InteractionUtil();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -161,13 +161,18 @@ class ReceiveThreat implements Runnable {
                         step = cmdSize;
                         logger.info(">>>[seq:" + seq + "]" + "] 开始读取COMMAND");
                     } else if (seq == BUSIDATA_SEQ) {
-                        step = busiDataSize;
+                        step = Math.abs(busiDataSize);//可能有符号位,负数
                         logger.info(">>>[seq:" + seq + "]" + "] 开始读取DATA");
                     }
 
                     //实际每次读到的字符数
                     byte[] buf = new byte[step];
                     int readBytes = reader.read(buf, 0, buf.length);
+                    if(readBytes==0){
+                        //如果返回指令告知设备没有可升级版本后,设备不会再发指令上来,本线程要关闭,不能再死循环等设备端指令
+                        //要关闭socket和停止本线程
+                        close(writer,reader);
+                    }
                     totalReadBytes += readBytes;
 
                     StringBuffer sb = new StringBuffer();
@@ -186,7 +191,7 @@ class ReceiveThreat implements Runnable {
                     //获取指令
                     if (seq == CMD_SEQ) {
                         cmdHex = InteractionUtil.byteArray2Int(buf);
-                        logger.info("-> COMMAND[Hex]:" + Integer.toHexString(cmdHex));
+                        logger.info("-> COMMAND[Hex]:0x" + Integer.toHexString(cmdHex));
                     }
 
                     //报文总长等于当前已读字节数的时候，表示已经读完
@@ -197,15 +202,31 @@ class ReceiveThreat implements Runnable {
                     }
                 } catch (Exception e) {
                     readable = false;
+                    assert writer !=null;
                     try {
-                        if (null != writer) {
-                            writer.close();
-                        }
-                        if (null != reader) {
-                            reader.close();
-                        }
+                        writer.close();
+
                     } catch (IOException ex) {
                         ex.printStackTrace();
+                    }
+                    assert reader !=null;
+                    try {
+                        reader.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    } finally{
+                        assert writer != null;
+                        try {
+                            writer.close();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                        assert reader !=null;
+                        try {
+                            reader.close();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                     e.printStackTrace();
                 }
@@ -231,7 +252,7 @@ class ReceiveThreat implements Runnable {
             }
             //请求升级文件
             if (cmd == InteractionUtil.CMD_UPGRADE_REQUEST) {
-                String downloadMark=sb.toString().split("\n")[2].split(":")[1];
+                String downloadMark = sb.toString().split("\n")[2].split(":")[1];
                 if (InteractionUtil.undownload.equals(downloadMark)) return;//客户端不下载文件
                 //先应答升级文件请求
                 sendBytesToClient(writer, sendBytes);
@@ -289,12 +310,33 @@ class ReceiveThreat implements Runnable {
     }
 
     private void close(BufferedOutputStream out, BufferedInputStream in) {
+        assert out != null;
         try {
             out.close();
-            in.close();
-            logger.info(">服务端链路已关闭,开始等待下次连接...");
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        assert in != null;
+        try {
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            assert out != null;
+            try {
+                out.close();
+                logger.info(">>>服务端输出流已关闭");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            assert in != null;
+            try {
+                in.close();
+                logger.info(">>>服务端输入流已关闭");
+                logger.info(">>>本次升级完成,开始等待下次升级...");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
@@ -302,7 +344,7 @@ class ReceiveThreat implements Runnable {
 /**
  * 发送信息线程
  */
-class SendThreat implements Runnable{
+class SendThreat implements Runnable {
 
     private Socket socket;
     private BufferedOutputStream bos;
@@ -317,12 +359,13 @@ class SendThreat implements Runnable{
             e.printStackTrace();
         }
     }
+
     @Override
     public void run() {
-        while (true){
+        while (true) {
             try {
-                byte[] msg=getMsg();
-                if(msg.length>0){
+                byte[] msg = getMsg();
+                if (msg.length > 0) {
                     bos.write(msg);
                     bos.flush();
                 }
@@ -332,8 +375,8 @@ class SendThreat implements Runnable{
         }
     }
 
-    private byte[] getMsg(){
+    private byte[] getMsg() {
         return null;
-       // return InteractionUtil.getMsg();
+        // return InteractionUtil.getMsg();
     }
 }
