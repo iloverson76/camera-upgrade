@@ -75,7 +75,16 @@ public class JsonHttpClient {
             return;
         }
         ONLINE_DEVICE_IDS.forEach(id -> {
-            new Thread(new UpgradrThread().builder()
+            //升级线程
+            new Thread(UpgradrThread.builder()
+                    .jsonIp(JSON_IP)
+                    .jsonPort(JSON_PORT)
+                    .deviceId(id)
+                    .token(TOKEN)
+                    .a_ipaddr(a_ipaddr)
+                    .un_port(un_port).build()).start();
+            //查询升级进度线程
+            new Thread(UpgradeProgressThread.builder()
                     .jsonIp(JSON_IP)
                     .jsonPort(JSON_PORT)
                     .deviceId(id)
@@ -127,8 +136,8 @@ class UpgradrThread implements Runnable {
      */
     @Override
     public void run() {
+        log.info(">>>开始升级设备["+this.deviceId+"]");
         Object resultObject = startUpgrade(this.jsonIp, this.jsonPort, this.deviceId, this.token, this.a_ipaddr, this.un_port);
-
     }
 
     private Object startUpgrade(String jsonIp, String jsonPort, String deviceId,
@@ -180,27 +189,33 @@ class UpgradeProgressThread implements Runnable {
     @Override
     public void run() {
         boolean running=true;
+        int seq=0;
         while(running){
+            log.info(">>>查询设备["+this.deviceId+"]当前升级进度("+(++seq)+")");
             Object resultObject = queryUpgradeProcess(this.jsonIp, this.jsonPort, this.deviceId, this.token, this.a_ipaddr, this.un_port);
             if(resultObject instanceof DeviceObject){
                 String resultCode=((DeviceObject) resultObject).getResultCode();
-                log.info("当前升级进度:==="+resultCode+"===");
+                log.info(">>>设备["+this.deviceId+"]当前升级进度:===>"+resultCode);
                 if(resultCode.equals("200")){
-                    log.info(">>>升级完成,json链路关闭");
+                    log.info(">>设备[+"+this.deviceId+"]升级完成,json链路关闭");
                     running=false;
-                }else if(resultObject instanceof ForwardObject){
-                    log.info(">>>"+((ForwardObject)resultObject).getResultDesc());
-                    running=false;
+                    log.info("running="+running);
                 }
+            }else if(resultObject instanceof ForwardObject){
+                log.info(">>>"+((ForwardObject)resultObject).getResultDesc()+"["+this.deviceId+"]");
+                running=false;
+                log.info("running="+running);
             }else{
                 log.info(">>>未知的返回结果类型!");
+                running=false;
+                log.info("running="+running);
             }
         }
     }
 
     Object queryUpgradeProcess(String targetIp, String targetPort, String deviceId, String token,
                              String a_ipaddr, String un_port){
-
+        log.info("");
        return new RequestThread().builder().build().request(targetIp, targetPort, deviceId, token,
                 a_ipaddr, un_port);
     }

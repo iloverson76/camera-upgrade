@@ -89,7 +89,7 @@ public class UpgradeServer {
                 log.info("[" + new Date() + "]客户端 " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort() + " 连接成功！");
 
                 //开启客户端接收信息线程
-                new Thread(new ReceiveThreat(socket)).start();
+                new Thread(new ReceiveThread(socket)).start();
                 //开始客户端发送信息线程
                 // new Thread(new SendThreat(socket)).start();
             } catch (IOException e) {
@@ -102,9 +102,9 @@ public class UpgradeServer {
 /**
  * 接收信息线程
  */
-class ReceiveThreat implements Runnable {
+class ReceiveThread implements Runnable {
 
-    public static Log log = LogFactory.getLog(ReceiveThreat.class);
+    public static Log log = LogFactory.getLog(ReceiveThread.class);
     private static boolean running = false;
     private static boolean readable = false;
     private Socket socket;
@@ -112,7 +112,7 @@ class ReceiveThreat implements Runnable {
     private BufferedOutputStream writer = null;
     private InteractionUtil interactionUtil = null;
 
-    public ReceiveThreat(Socket socket) {
+    public ReceiveThread(Socket socket) {
         super();
         this.socket = socket;
         try {
@@ -168,11 +168,6 @@ class ReceiveThreat implements Runnable {
                     //实际每次读到的字符数
                     byte[] buf = new byte[step];
                     int readBytes = reader.read(buf, 0, buf.length);
-                    if(readBytes==0){
-                        //如果返回指令告知设备没有可升级版本后,设备不会再发指令上来,本线程要关闭,不能再死循环等设备端指令
-                        //要关闭socket和停止本线程
-                        close(writer,reader);
-                    }
                     totalReadBytes += readBytes;
 
                     StringBuffer sb = new StringBuffer();
@@ -191,6 +186,11 @@ class ReceiveThreat implements Runnable {
                     //获取指令
                     if (seq == CMD_SEQ) {
                         cmdHex = InteractionUtil.byteArray2Int(buf);
+                        if (cmdHex == 0) {
+                            //如果返回指令告知设备没有可升级版本后,设备不会再发指令上来,本线程要关闭,不能再死循环等设备端指令
+                            //要关闭socket和停止本线程
+                            closeForNoUpgradeVersion(writer, reader);
+                        }
                         log.info("-> COMMAND[Hex]:0x" + Integer.toHexString(cmdHex));
                     }
 
@@ -202,26 +202,26 @@ class ReceiveThreat implements Runnable {
                     }
                 } catch (Exception e) {
                     readable = false;
-                    assert writer !=null;
+                    assert writer != null;
                     try {
                         writer.close();
 
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
-                    assert reader !=null;
+                    assert reader != null;
                     try {
                         reader.close();
                     } catch (IOException ex) {
                         ex.printStackTrace();
-                    } finally{
+                    } finally {
                         assert writer != null;
                         try {
                             writer.close();
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                        assert reader !=null;
+                        assert reader != null;
                         try {
                             reader.close();
                         } catch (IOException ex) {
@@ -244,12 +244,15 @@ class ReceiveThreat implements Runnable {
     private void actionByCmd(int cmd, StringBuffer sb) {
         byte[] sendBytes = null;
         try {
+
             sendBytes = InteractionUtil.actionByCmd(cmd, sb);
+
             //2.2.6 接收文件应答 0xF001 result:ok 后客户端重启设备,关闭服务端的socket和线程
             if (cmd == InteractionUtil.CMD_UPGRADE_PACK_RECEIVE_REQUEST) {
                 closeConnection(writer, reader);
                 return;
             }
+
             //请求升级文件
             if (cmd == InteractionUtil.CMD_UPGRADE_REQUEST) {
                 String downloadMark = sb.toString().split("\n")[2].split(":")[1];
@@ -260,7 +263,18 @@ class ReceiveThreat implements Runnable {
                 sendBytesToClient(writer, InteractionUtil.transferFile(InteractionUtil.CMD_UPGRADE_PACK_TRANSFER));
                 return;
             }
+
             sendBytesToClient(writer, sendBytes);
+
+            //如果没有可升级版本,通知设备后要主动断开这次连接的socket
+            log.info(">>>sendBytes length:" + sendBytes.length);
+            byte[] buf = new byte[sendBytes.length - 8];
+            System.arraycopy(sendBytes, 8, buf, 0, sendBytes.length - 8);
+            String resultData = new String(buf);
+            log.info(">>>resultData:" + resultData);
+            if (resultData.equals("none")) {
+                closeForNoUpgradeVersion(writer, reader);
+            }
             //设备重启后,发送查询升级结果的指令,重新建立连接
             //2.2.8 升级结果查询的回复 0x5005 result:ok 后,服务端关闭socket和线程,整个升级过程全部结束
             if (cmd == InteractionUtil.CMD_UPGRADE_RESULT_REQUEST) {
@@ -303,9 +317,9 @@ class ReceiveThreat implements Runnable {
             }
         } catch (IOException e) {
             log.info(">客户端链路已关闭");
+            close(out, in);
             readable = false;
             running = false;
-            close(out, in);
         }
     }
 
@@ -314,20 +328,20 @@ class ReceiveThreat implements Runnable {
         try {
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info(">>>服务端输出流关闭异常");
         }
         assert in != null;
         try {
             in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info(">>>服务端输入流关闭异常");
         } finally {
             assert out != null;
             try {
                 out.close();
                 log.info(">>>服务端输出流已关闭");
             } catch (IOException e) {
-                e.printStackTrace();
+                log.info(">>>服务端输出流关闭异常");
             }
             assert in != null;
             try {
@@ -335,48 +349,39 @@ class ReceiveThreat implements Runnable {
                 log.info(">>>服务端输入流已关闭");
                 log.info(">>>本次升级完成,开始等待下次升级...");
             } catch (IOException e) {
-                e.printStackTrace();
+                log.info(">>>服务端输入流关闭异常");
             }
         }
     }
-}
 
-/**
- * 发送信息线程
- */
-class SendThreat implements Runnable {
-
-    private Socket socket;
-    private BufferedOutputStream bos;
-
-    public SendThreat(Socket socket) {
-        super();
-        this.socket = socket;
+    private void closeForNoUpgradeVersion(BufferedOutputStream out, BufferedInputStream in) {
+        assert out != null;
         try {
-            //获取socket的输出流
-            bos = new BufferedOutputStream(socket.getOutputStream());
+            out.close();
+            readable = false;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info(">>>没有可升级版本,输出流关闭");
         }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
+        assert in != null;
+        try {
+            in.close();
+            running = false;
+            log.info(">>>没有可升级版本,输入流关闭");
+        } catch (IOException e) {
+            log.info(">>>没有可升级版本,输入流关闭异常");
+        } finally {
+            assert out != null;
             try {
-                byte[] msg = getMsg();
-                if (msg.length > 0) {
-                    bos.write(msg);
-                    bos.flush();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                out.close();
+            } catch (IOException e) {
+                log.info(">>>服务端输出流关闭异常");
+            }
+            assert in != null;
+            try {
+                in.close();
+            } catch (IOException e) {
+                log.info(">>>服务端输入流关闭异常");
             }
         }
-    }
-
-    private byte[] getMsg() {
-        return null;
-        // return InteractionUtil.getMsg();
     }
 }

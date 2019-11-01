@@ -87,6 +87,7 @@ public class DeviceInfo {
             log.info(deviceId);
         });
         deviceIds.add("868334033322417");
+        deviceIds.add("868334033324165");
         log.info("在线3518设备=====================↑");
         return deviceIds;
     }

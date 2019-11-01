@@ -1,8 +1,10 @@
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\server\InteractionUtil.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\client\JsonHttpClient.java
+E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\client\TokenTools.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\client\DeviceObject.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\data\Device.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\client\UpgradeClient.java
+E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\client\TokenProccessor.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\data\DeviceInfo.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\client\ForwardObject.java
 E:\IdeaProjects\camera-upgradation\camera-upgrade\src\main\java\com\gzrock\server\UpgradeServer.java
