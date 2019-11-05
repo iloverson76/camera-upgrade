@@ -186,11 +186,6 @@ class ReceiveThread implements Runnable {
                     //获取指令
                     if (seq == CMD_SEQ) {
                         cmdHex = InteractionUtil.byteArray2Int(buf);
-                        if (cmdHex == 0) {
-                            //如果返回指令告知设备没有可升级版本后,设备不会再发指令上来,本线程要关闭,不能再死循环等设备端指令
-                            //要关闭socket和停止本线程
-                            closeForNoUpgradeVersion(writer, reader);
-                        }
                         log.info("-> COMMAND[Hex]:0x" + Integer.toHexString(cmdHex));
                     }
 
