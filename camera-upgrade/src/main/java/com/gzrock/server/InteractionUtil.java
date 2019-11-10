@@ -2,11 +2,11 @@ package com.gzrock.server;
 
 import com.gzrock.data.DeviceUpgradeRecord;
 import com.gzrock.data.DeviceUtil;
+import com.gzrock.data.DeviceWfiGetsRouting;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.BeanUtils;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -237,7 +237,7 @@ public class InteractionUtil {
                             .imei(curDeviceId)
                             .build()
             );
-            log.info(">>>客户端已成功下载升级包下载结果已记录到数据库");
+            log.info(">>>客户端已成功下载升级包,结果已记录到数据库");
             //开始异步查询升级结果
             new Thread( QueryUpgradeResult.builder()
                     .deviceId(curDeviceId)
@@ -420,7 +420,8 @@ public class InteractionUtil {
         String origStr = sb.toString();
         String[] origStrArr = origStr.split("\n");
         if ("none".equalsIgnoreCase(origStrArr[2].split(":")[1])) {
-            download = false;//客户端不下载
+            //客户端不下载
+            download = false;
         }
         StringBuffer dataBuf = new StringBuffer();
         dataBuf.append(origStrArr[0])
@@ -507,21 +508,28 @@ class QueryUpgradeResult implements Runnable {
         int time=0;
         while (running) {
             try {
-                //十分钟后不再查询
-                if(time>10*60000){
+                log.info("开始第" + (++seq) + "次查询设备["+this.deviceId+"]升级结果");
+                //五分钟后不再查询
+                if(time>5*60000){
                     running=false;
+                    log.info("设备["+this.deviceId+"]下载完升级包重启后没有上报版本号");
+                    break;
                 }
                 time=time+30000;
-                log.info("第" + (++seq) + "次查询升级结果");
                 //30秒查询一次升级结果
                 Thread.sleep(30000);
                 String pushVersion = getUpgradeVersion(this.deviceId);
                 log.info(">>>当前设备[" + this.deviceId + "]上报版本[" + pushVersion + "]");
-                if (pushVersion.equals(this.newVersion)) {
-                    DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 0);
+                if(!"".equals(pushVersion)){
+                    if (pushVersion.equals(this.newVersion)) {
+                        DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 0);
+                        log.info(">>>设备["+this.deviceId +"]升级成功!");
+                    } else {
+                        DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 4);
+                        log.info("设备升级重启后上报不符合预期的版本["+pushVersion+"]");
+                    }
                     running = false;
-                } else {
-                    DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 4);
+                    break;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -530,6 +538,12 @@ class QueryUpgradeResult implements Runnable {
     }
 
     private String getUpgradeVersion(String deviceId) {
-        return DeviceUtil.builder().build().getUpgradeVersion(deviceId).getSoftware();
+        DeviceWfiGetsRouting result=DeviceUtil.builder().build().getUpgradeVersion(deviceId);
+        if(null==result){
+            return "";
+        }
+        //"Software":"C_800.U5826HAA.010.509"
+        String[] retStr=result.getSoftware().split("\\.");
+        return retStr[retStr.length-1];
     }
 }

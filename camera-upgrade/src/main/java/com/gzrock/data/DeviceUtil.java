@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -112,15 +113,20 @@ public class DeviceUtil {
         );
     }
     public void updateUpgradeResult(String deviceId,Integer result){
-        String sql = "update wp_device_upgrade_record set upgrade_result=? where imei=? ";
+        String sql = "update wp_device_upgrade_record set upgrade_result=? where imei= ? ";
         JDBCTEMPLATE.update(sql, result, deviceId);
     }
     public DeviceWfiGetsRouting getUpgradeVersion(String deviceId){
         String sql=
-                "select software from wp_device_wifi_gets_routing where deviceId="
-                +deviceId
-                +" order by create_time desc limit 1";
-        return JDBCTEMPLATE.queryForObject(sql,DeviceWfiGetsRoutingMapper.builder().build());
+                "select deviceid,software from wp_device_wifi_gets_routing where deviceId=? order by create_time desc limit 1";
+        DeviceWfiGetsRouting result;
+        try {
+           // deviceId="8611110000222233";
+            result = JDBCTEMPLATE.queryForObject(sql,new Object[]{deviceId},DeviceWfiGetsRoutingMapper.builder().build());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+        return result;
     }
 
     /**
