@@ -1,7 +1,7 @@
 package com.gzrock.client;
 
 import com.alibaba.fastjson.JSON;
-import com.gzrock.data.DeviceInfo;
+import com.gzrock.data.DeviceUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -61,8 +62,8 @@ public class JsonHttpClient {
     private static List<String> ONLINE_DEVICE_IDS;
 
     static{
-        ONLINE_DEVICE_IDS = DeviceInfo.builder().build().getOnlineDeviceIds3518();
-        TOKEN=DeviceInfo.builder().build().getOnlineMemberToken();
+        ONLINE_DEVICE_IDS = DeviceUtil.builder().build().getOnlineDeviceIds3518();
+        TOKEN= DeviceUtil.builder().build().getOnlineMemberToken();
     }
 
     public static void main(String[] args) {
@@ -191,7 +192,7 @@ class UpgradeProgressThread implements Runnable {
         boolean running=true;
         int seq=0;
         while(running){
-            log.info(">>>查询设备["+this.deviceId+"]当前升级进度("+(++seq)+")");
+            log.info(">>>第"+(++seq)+"次查询设备["+this.deviceId+"]当前升级进度");
             Object resultObject = queryUpgradeProcess(this.jsonIp, this.jsonPort, this.deviceId, this.token, this.a_ipaddr, this.un_port);
             if(resultObject instanceof DeviceObject){
                 String resultCode=((DeviceObject) resultObject).getResultCode();
@@ -199,7 +200,7 @@ class UpgradeProgressThread implements Runnable {
                 if(resultCode.equals("200")){
                     log.info(">>设备[+"+this.deviceId+"]升级完成,json链路关闭");
                     running=false;
-                    log.info("running="+running);
+                    log.info(">running="+running);
                 }
             }else if(resultObject instanceof ForwardObject){
                 log.info(">>>"+((ForwardObject)resultObject).getResultDesc()+"["+this.deviceId+"]");
@@ -227,7 +228,6 @@ class UpgradeProgressThread implements Runnable {
 @Data
 @Builder
 @AllArgsConstructor
-//@NoArgsConstructor
 @Accessors(chain = true)
 @Slf4j
 class RequestThread{
@@ -313,7 +313,7 @@ class RequestThread{
             StringBuilder result=new StringBuilder();
             String str="";
             while ((str = br.readLine()) != null) {
-                str = new String(str.getBytes(), "UTF-8");//解决中文乱码问题
+                str = new String(str.getBytes(), StandardCharsets.UTF_8);
                 result.append(str);
                 // log.info(str);
             }
@@ -340,7 +340,7 @@ class RequestThread{
             }else if (jsonResult.contains("ResultDesc")){
                 resultObject =JSON.parseObject(jsonResult,ForwardObject.class);
             }
-            log.info(resultObject.toString());
+            log.info("json链路返回升级结果"+resultObject.toString());
             log.info("request complete!");
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package com.gzrock.data;
 
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.mysql.cj.x.protobuf.MysqlxResultset;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,10 +25,10 @@ import java.util.*;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Slf4j
-public class DeviceInfo {
+public class DeviceUtil {
 
     private static DriverManagerDataSource dataSource;
-    private static JdbcTemplate jdbcTemplate;
+    private static JdbcTemplate JDBCTEMPLATE;
 
     private static String url;
 
@@ -37,11 +38,12 @@ public class DeviceInfo {
 
     static{
         initDataSource();
+        JDBCTEMPLATE=getJdbcTemplate();
     }
 
     private static void initDataSource(){
         Yaml yaml = new Yaml();
-        Map<String, Object> ret = (Map<String, Object>) yaml.load(DeviceInfo.class
+        Map<String, Object> ret = (Map<String, Object>) yaml.load(DeviceUtil.class
                 .getClassLoader().getResourceAsStream("application.yaml"));
         LinkedHashMap spring= (LinkedHashMap) ret.get("spring");
         LinkedHashMap obj= (LinkedHashMap) spring.get("datasource");
@@ -75,7 +77,7 @@ public class DeviceInfo {
                 "\t\twhere 1=1 and a.network_status=0 and a.device_type=1\n" +
                 ") e\n" +
                 "where e.verson>=210";
-        List<Device> devices= getJdbcTemplate().query(sql, new DeviceRowMapper());
+        List<Device> devices=JDBCTEMPLATE.query(sql, new DeviceRowMapper());
         List<String> deviceIds=new ArrayList<>(devices.size());
         if(CollectionUtils.isEmpty(devices)){
            //return Collections.EMPTY_LIST;
@@ -86,11 +88,41 @@ public class DeviceInfo {
             deviceIds.add(deviceId);
             log.info(deviceId);
         });
-        deviceIds.add("868334033322417");
+      //  deviceIds.add("868334033322417");
         deviceIds.add("868334033324165");
         log.info("在线3518设备=====================↑");
         return deviceIds;
     }
+
+    public void createUpgradeResultBegin(DeviceUpgradeRecord record){
+        String sql = "insert into wp_device_upgrade_record (imei,begin_time,old_version) values (?, ?, ?)";
+        JDBCTEMPLATE.update(sql,
+                record.getImei(),
+                record.getBeginTime(),
+                record.getOldVersion()
+        );
+    }
+    public void createUpgradeResultEnd(DeviceUpgradeRecord record){
+        String sql = "update wp_device_upgrade_record set end_time=? ,new_version=? ,upgrade_result=? where imei=? ";
+        JDBCTEMPLATE.update(sql,
+                record.getEndTime(),
+                record.getNewVersion(),
+                record.getUpgradeResult(),
+                record.getImei()
+        );
+    }
+    public void updateUpgradeResult(String deviceId,Integer result){
+        String sql = "update wp_device_upgrade_record set upgrade_result=? where imei=? ";
+        JDBCTEMPLATE.update(sql, result, deviceId);
+    }
+    public DeviceWfiGetsRouting getUpgradeVersion(String deviceId){
+        String sql=
+                "select software from wp_device_wifi_gets_routing where deviceId="
+                +deviceId
+                +" order by create_time desc limit 1";
+        return JDBCTEMPLATE.queryForObject(sql,DeviceWfiGetsRoutingMapper.builder().build());
+    }
+
     /**
      * 获取在线用户token
      *
@@ -98,7 +130,7 @@ public class DeviceInfo {
      */
     public String getOnlineMemberToken() {
         String sql="select token from wp_member_info where token is not null limit 0,1";
-        Device device= getJdbcTemplate().queryForObject(sql, new TokenRowMapper());
+        Device device= JDBCTEMPLATE.queryForObject(sql, new TokenRowMapper());
         String token=device.getToken();
         log.info(">>>在线用户token:"+token);
         //return token;
@@ -108,13 +140,40 @@ public class DeviceInfo {
 
 class DeviceRowMapper implements RowMapper<Device> {
     //rs为返回结果集，以每行为单位封装着
+    @Override
     public Device mapRow(ResultSet rs, int rowNum) throws SQLException {
-       return new Device().builder().deviceId(rs.getString("DeviceId")).build();
+       return Device.builder().deviceId(rs.getString("DeviceId")).build();
     }
 }
 class TokenRowMapper implements RowMapper<Device> {
-    //rs为返回结果集，以每行为单位封装着
+    @Override
     public Device mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new Device().builder().token(rs.getString("token")).build();
+        return Device.builder().token(rs.getString("token")).build();
+    }
+}
+
+class DeviceUpgradeRecordMapper implements RowMapper<DeviceUpgradeRecord>{
+    @Override
+    public DeviceUpgradeRecord mapRow(ResultSet resultSet, int i) throws SQLException {
+        return DeviceUpgradeRecord.builder()
+                .imei(resultSet.getString("imei"))
+                .beginTime(resultSet.getTimestamp("begin_time"))
+                .endTime(resultSet.getTimestamp("end_time"))
+                .oldVersion(resultSet.getString("old_version"))
+                .newVersion(resultSet.getString("new_version"))
+                .upgradeResult(resultSet.getInt("upgrade_result"))
+                .build();
+    }
+}
+
+@Builder
+@Accessors(chain = true)
+class DeviceWfiGetsRoutingMapper implements RowMapper<DeviceWfiGetsRouting>{
+    @Override
+    public DeviceWfiGetsRouting mapRow(ResultSet resultSet, int i) throws SQLException {
+        return DeviceWfiGetsRouting.builder()
+                .deviceId(resultSet.getString("deviceId"))
+                .software(resultSet.getString("software"))
+                .build();
     }
 }

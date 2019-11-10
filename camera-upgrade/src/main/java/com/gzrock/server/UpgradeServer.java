@@ -3,6 +3,7 @@ package com.gzrock.server;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -71,12 +72,12 @@ public class UpgradeServer {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        Assert.assertNotNull(args);
         validationParams(args);
         uploadFile(args[1], args[2]);
-
         ServerSocket serverSocket = null;
         try {
-            //新建一个服务端ServerSocket,端口号为8888
+            /* 新建一个服务端ServerSocket,端口号为8888 */
             serverSocket = new ServerSocket(Integer.valueOf(args[0]));
             log.info("等待客户端连接!");
         } catch (IOException e) {
@@ -110,18 +111,16 @@ class ReceiveThread implements Runnable {
     private Socket socket;
     private BufferedInputStream reader;
     private BufferedOutputStream writer = null;
-    private InteractionUtil interactionUtil = null;
 
     public ReceiveThread(Socket socket) {
         super();
         this.socket = socket;
         try {
-            //获取socket的输入流
+            /* 获取socket的输入流 */
             reader = new BufferedInputStream(socket.getInputStream());
             writer = new BufferedOutputStream(socket.getOutputStream());
             running = true;
             readable = true;
-            interactionUtil = new InteractionUtil();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,26 +129,26 @@ class ReceiveThread implements Runnable {
     @Override
     public void run() {
         while (running) {
-            //LENGTH字段总长(字节)
+            /* LENGTH字段总长(字节) */
             final int lengthSize = 4;
-            //command字段总长(字节)
+            /* command字段总长(字节) */
             final int cmdSize = 4;
-            //data字段：业务数据总长(字节)=bytesToInt(lengthSize)
+            /* data字段：业务数据总长(字节)=bytesToInt(lengthSize) */
             int busiDataSize = 0;
-            //每次读step个字节(对应读次序的字段的字节数)
+            /* 每次读step个字节(对应读次序的字段的字节数) */
             int step = 0;
-            //读次序(协议规定)
+            /* 读次序(协议规定) */
             int LENGTH_SEQ = 1;
             int CMD_SEQ = 2;
             int BUSIDATA_SEQ = 3;
-            //十六进制指令
+            /* 十六进制指令 */
             int cmdHex = 0;
-            //当前读到的字节总数
+            /* 当前读到的字节总数 */
             int totalReadBytes = 0;
-            //报文数据总长(字节)
+            /* 报文数据总长(字节) */
             int totalSize = 0;
             int seq = 0;
-            //解释报文
+            /* 解释报文 */
             while (readable) {
                 log.info("......server thread reading.....");
                 seq++;
@@ -161,11 +160,12 @@ class ReceiveThread implements Runnable {
                         step = cmdSize;
                         log.info(">>>[seq:" + seq + "]" + "] 开始读取COMMAND");
                     } else if (seq == BUSIDATA_SEQ) {
-                        step = Math.abs(busiDataSize);//可能有符号位,负数
+                        /* 可能有符号位,负数 */
+                        step = Math.abs(busiDataSize);
                         log.info(">>>[seq:" + seq + "]" + "] 开始读取DATA");
                     }
 
-                    //实际每次读到的字符数
+                    /* 实际每次读到的字符数 */
                     byte[] buf = new byte[step];
                     int readBytes = reader.read(buf, 0, buf.length);
                     totalReadBytes += readBytes;
@@ -174,7 +174,7 @@ class ReceiveThread implements Runnable {
                     String str = new String(buf);
                     sb.append(str);
 
-                    //报文总长：按网络字节序发送和接收
+                    /* 报文总长：按网络字节序发送和接收 */
                     if (totalReadBytes == lengthSize) {
                         busiDataSize = bytesToInt(buf, 0);
                         log.info("->busiDataSize:" + busiDataSize);
@@ -183,13 +183,13 @@ class ReceiveThread implements Runnable {
                         continue;//这段逻辑只运行一次：首次读的时候
                     }
 
-                    //获取指令
+                    /* 获取指令 */
                     if (seq == CMD_SEQ) {
                         cmdHex = InteractionUtil.byteArray2Int(buf);
                         log.info("-> COMMAND[Hex]:0x" + Integer.toHexString(cmdHex));
                     }
 
-                    //报文总长等于当前已读字节数的时候，表示已经读完
+                    /* 报文总长等于当前已读字节数的时候，表示已经读完 */
                     if (totalSize == totalReadBytes) {
                         log.info(">>>报文接收完鸟<<<");
                         actionByCmd(cmdHex, sb);
@@ -237,31 +237,30 @@ class ReceiveThread implements Runnable {
      * @return
      */
     private void actionByCmd(int cmd, StringBuffer sb) {
-        byte[] sendBytes = null;
         try {
+            byte[] sendBytes = InteractionUtil.actionByCmd(cmd, sb);
 
-            sendBytes = InteractionUtil.actionByCmd(cmd, sb);
-
-            //2.2.6 接收文件应答 0xF001 result:ok 后客户端重启设备,关闭服务端的socket和线程
+            /* 2.2.6 接收文件应答 0xF001 result:ok 后客户端重启设备,关闭服务端的socket和线程 */
             if (cmd == InteractionUtil.CMD_UPGRADE_PACK_RECEIVE_REQUEST) {
                 closeConnection(writer, reader);
                 return;
             }
 
-            //请求升级文件
+            /* 请求升级文件 */
             if (cmd == InteractionUtil.CMD_UPGRADE_REQUEST) {
                 String downloadMark = sb.toString().split("\n")[2].split(":")[1];
-                if (InteractionUtil.undownload.equals(downloadMark)) return;//客户端不下载文件
-                //先应答升级文件请求
+                /* 客户端不下载文件 */
+                if (InteractionUtil.undownload.equals(downloadMark)){ return;}
+                /* 先应答升级文件请求 */
                 sendBytesToClient(writer, sendBytes);
-                //接着传送升级文件
+                /* 接着传送升级文件 */
                 sendBytesToClient(writer, InteractionUtil.transferFile(InteractionUtil.CMD_UPGRADE_PACK_TRANSFER));
                 return;
             }
 
             sendBytesToClient(writer, sendBytes);
 
-            //如果没有可升级版本,通知设备后要主动断开这次连接的socket
+            /* 如果没有可升级版本,通知设备后要主动断开这次连接的socket */
             log.info(">>>sendBytes length:" + sendBytes.length);
             byte[] buf = new byte[sendBytes.length - 8];
             System.arraycopy(sendBytes, 8, buf, 0, sendBytes.length - 8);
@@ -270,8 +269,10 @@ class ReceiveThread implements Runnable {
             if (resultData.equals("none")) {
                 closeForNoUpgradeVersion(writer, reader);
             }
-            //设备重启后,发送查询升级结果的指令,重新建立连接
-            //2.2.8 升级结果查询的回复 0x5005 result:ok 后,服务端关闭socket和线程,整个升级过程全部结束
+            /*
+            设备重启后,发送查询升级结果的指令,重新建立连接
+            2.2.8 升级结果查询的回复 0x5005 result:ok 后,服务端关闭socket和线程,整个升级过程全部结束
+            */
             if (cmd == InteractionUtil.CMD_UPGRADE_RESULT_REQUEST) {
                 closeConnection(writer, reader);
                 return;
@@ -283,7 +284,6 @@ class ReceiveThread implements Runnable {
 
     /**
      * 发送信息给客户端
-     *
      * @param writer
      * @param sendBytes
      */
@@ -292,7 +292,7 @@ class ReceiveThread implements Runnable {
         try {
             writer.write(sendBytes);
             writer.flush();
-            log.info(" ^_^发送成功,本次交互完成鸟^_^");
+            log.info("^_^发送成功,本次交互完成鸟^_^");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -306,7 +306,7 @@ class ReceiveThread implements Runnable {
      */
     private void closeConnection(BufferedOutputStream out, BufferedInputStream in) {
         try {
-            //不断发送指令,判断客户端是否已关闭,
+            /* 不断发送指令,判断客户端是否已关闭, */
             while (true) {
                 socket.sendUrgentData(0xFF);
             }
