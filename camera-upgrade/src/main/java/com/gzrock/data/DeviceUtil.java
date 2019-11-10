@@ -121,7 +121,7 @@ public class DeviceUtil {
                 "select deviceid,software from wp_device_wifi_gets_routing where deviceId=? order by create_time desc limit 1";
         DeviceWfiGetsRouting result;
         try {
-           // deviceId="8611110000222233";
+//            deviceId="8611110000222233";
             result = JDBCTEMPLATE.queryForObject(sql,new Object[]{deviceId},DeviceWfiGetsRoutingMapper.builder().build());
         } catch (EmptyResultDataAccessException e) {
             return null;

@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -520,7 +521,7 @@ class QueryUpgradeResult implements Runnable {
                 Thread.sleep(30000);
                 String pushVersion = getUpgradeVersion(this.deviceId);
                 log.info(">>>当前设备[" + this.deviceId + "]上报版本[" + pushVersion + "]");
-                if(!"".equals(pushVersion)){
+                if(StringUtils.isNotEmpty(pushVersion)){
                     if (pushVersion.equals(this.newVersion)) {
                         DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 0);
                         log.info(">>>设备["+this.deviceId +"]升级成功!");
