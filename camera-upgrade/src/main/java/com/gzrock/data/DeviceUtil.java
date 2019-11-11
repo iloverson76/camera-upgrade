@@ -1,7 +1,6 @@
 package com.gzrock.data;
 
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.mysql.cj.x.protobuf.MysqlxResultset;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -81,7 +80,7 @@ public class DeviceUtil {
         List<Device> devices=JDBCTEMPLATE.query(sql, new DeviceRowMapper());
         List<String> deviceIds=new ArrayList<>(devices.size());
         if(CollectionUtils.isEmpty(devices)){
-           //return Collections.EMPTY_LIST;
+            return Collections.EMPTY_LIST;
         }
         log.info("在线3518设备=====================↓");
         devices.forEach(device -> {
@@ -89,8 +88,8 @@ public class DeviceUtil {
             deviceIds.add(deviceId);
             log.info(deviceId);
         });
-      //  deviceIds.add("868334033322417");
-        deviceIds.add("868334033324165");
+        //  deviceIds.add("868334033322417");
+        //  deviceIds.add("868334033324165");
         log.info("在线3518设备=====================↑");
         return deviceIds;
     }

@@ -88,7 +88,7 @@ public class InteractionUtil {
     /**
      * 升级包最新版本号(暂定数字)
      */
-    public static Integer currentVersion;
+    public static Integer  currentVersion;
     /**
      * 是否下载文件
      */
@@ -100,19 +100,19 @@ public class InteractionUtil {
     /**
      * 当前应答指令
      */
-    private static String CUR_RESP_CMD="";
+    private volatile static String CUR_RESP_CMD="";
     /**
      * 当前升级设备ID
      */
-    private static String CUR_DEVICE_ID ="";
+    private volatile static String CUR_DEVICE_ID ="";
     /**
      * 当前设备上报的版本
      */
-    private static String CUR_OLD_VERSION="";
+    private volatile static String CUR_OLD_VERSION="";
     /**
      * 当前最新升级包版本号
      */
-    private static String CUR_NEW_VERSION="";
+    private volatile static String CUR_NEW_VERSION="";
     /**
      * 初始化数据
      */
