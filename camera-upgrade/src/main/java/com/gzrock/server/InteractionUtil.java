@@ -3,6 +3,7 @@ package com.gzrock.server;
 import com.gzrock.data.DeviceUpgradeRecord;
 import com.gzrock.data.DeviceUtil;
 import com.gzrock.data.DeviceWfiGetsRouting;
+import com.gzrock.data.ExceptionUtil;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -80,11 +81,11 @@ public class InteractionUtil {
     /**
      * 文件名(命名规范:504.app.C_800.tar.bz2,504版本号开头)
      */
-    public static String fileName;
+    public static String FILE_NAME;
     /**
      * 文件对象
      */
-    public static File file;
+    public static File FILE;
     /**
      * 升级包最新版本号(暂定数字)
      */
@@ -100,19 +101,21 @@ public class InteractionUtil {
     /**
      * 当前应答指令
      */
-    private volatile static String CUR_RESP_CMD="";
+   // private  static String CUR_RESP_CMD="";
     /**
      * 当前升级设备ID
      */
-    private volatile static String CUR_DEVICE_ID ="";
+  //  private  static String CUR_DEVICE_ID ="";
     /**
      * 当前设备上报的版本
      */
-    private volatile static String CUR_OLD_VERSION="";
+   // private  static String CUR_OLD_VERSION="";
     /**
      * 当前最新升级包版本号
      */
-    private volatile static String CUR_NEW_VERSION="";
+    //private  static String CUR_NEW_VERSION="";
+
+    private static Map<String,String[]> deviceQueue=new HashMap<>();
     /**
      * 初始化数据
      */
@@ -125,7 +128,7 @@ public class InteractionUtil {
         try {
             clazz = Class.forName("com.gzrock.server.InteractionUtil");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
     }
 
@@ -135,7 +138,7 @@ public class InteractionUtil {
      * @param cmdHex:十六进制指令
      * @param busiData:业务数据(不包含LENGTH和COMMAND)
      */
-    public static byte[] actionByCmd(Integer cmdHex, StringBuffer busiData) throws Exception {
+    public static byte[] actionByCmd(Integer cmdHex, StringBuffer busiData){
         int num = 0;
         for (Integer key : cmdMethodMap.keySet()) {
             if (key.equals(cmdHex)) {
@@ -143,18 +146,18 @@ public class InteractionUtil {
             }
         }
         if (num == 0) {
-            throw new Exception("升级协议无此指令!" + cmdHex);
+            throw new RuntimeException("升级协议无此指令!" + cmdHex);
         }
         if (null == busiData || 0 == busiData.toString().length()) {
-            throw new Exception("业务数据获取有误!");
+            throw new RuntimeException("业务数据获取有误!");
         }
         String methodName = cmdMethodMap.get(cmdHex);
         byte[] result = null;
         try {
             result = (byte[]) clazz.getMethod(methodName, Integer.class, StringBuffer.class)
                     .invoke(clazz.newInstance(), cmdHex, busiData);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         return result;
     }
@@ -168,17 +171,17 @@ public class InteractionUtil {
      */
     public static byte[] pushDeviceVersionInfo(Integer cmd, StringBuffer sb) {
         log.info(">返回设备版本信息-请求指令[0x" + Integer.toHexString(cmd) + "] 应答指令[0x" +  Integer.toHexString(CMD_VERSION_RESPONSE) + "]");
-        CUR_RESP_CMD=Integer.toHexString(CMD_VERSION_RESPONSE);
         log.info("接收DATA:"+"\n"+sb.toString());
         String origStr = sb.toString();
         String[] origStrArr = origStr.split("\n");
         Integer deviceVersion=Integer.valueOf(origStrArr[2].split(":")[1]);
-        CUR_OLD_VERSION= new String(String.valueOf(deviceVersion));
-        log.info("设备当前版本:"+deviceVersion);
-        byte[] valRet = validateVersion(deviceVersion);
-        if (null != valRet){ return valRet;}
         String deviceId= origStrArr[0];
-        CUR_DEVICE_ID=deviceId;
+        log.info("设备当前版本:"+deviceVersion);
+        String[] infoArr=new String[2];
+        infoArr[0]=String.valueOf(deviceVersion);
+        deviceQueue.put(deviceId,infoArr);
+        byte[] valRet = validateVersion(deviceVersion,deviceId);
+        if (null != valRet){ return valRet;}
         StringBuffer dataBuf = new StringBuffer();
         dataBuf.append(deviceId)
                 .append("\n")
@@ -186,9 +189,9 @@ public class InteractionUtil {
                 .append("\n")
                 .append("app")
                 .append(":")
-                .append(fileName)//升级版本号要大于客户端传过来的版本号501>500
+                .append(FILE_NAME)
                 .append("\n");
-        log.info("应答报文:"+dataBuf.toString());
+        log.info("应答报文:"+"\n"+dataBuf.toString());
         Date beginTime=new Date();
         log.info(">>>创建升级记录到数据库 beginTime["+beginTime+"]");
         DeviceUtil.builder().build().createUpgradeResultBegin(
@@ -210,7 +213,6 @@ public class InteractionUtil {
      */
     public static byte[] transferFile(Integer cmd) {
         log.info(">开始传送文件,应答指令[0x" + Integer.toHexString(cmd) + "]");
-        CUR_RESP_CMD=Integer.toHexString(cmd);
         byte[] fileBytes = fileToByte(uploadFile());
         return getBytesWithFile(cmd, fileBytes);
     }
@@ -224,21 +226,23 @@ public class InteractionUtil {
      */
     public static byte[] packReceiveAckHandle(Integer cmd, StringBuffer sb) {
         log.info(">接收文件应答-请求指令[0x" + Integer.toHexString(cmd) + "]");
-        log.info("接收DATA:"+sb.toString());
+        log.info("接收DATA:"+"\n"+sb.toString());
         String resultStr = sb.toString();
         if (resultStr.contains(RECEIVE_FILE_COMPLETED)) {
-            String curNewVersion= new String(CUR_NEW_VERSION);
-            String curDeviceId= new String(CUR_DEVICE_ID);
-            String curOldVersion=new String(CUR_OLD_VERSION);
+            String curDeviceId= sb.toString().split("\n")[0];
+            String[] infoArr=deviceQueue.get(curDeviceId);
+            String curOldVersion=infoArr[0];
+            String curNewVersion=infoArr[1];
+
             DeviceUtil.builder().build().createUpgradeResultEnd(
                     DeviceUpgradeRecord.builder()
                             .endTime(new Date())
                             .newVersion(curNewVersion)
-                            .upgradeResult(3)
+                            .upgradeResult(0)
                             .imei(curDeviceId)
                             .build()
             );
-            log.info(">>>客户端已成功下载升级包,结果已记录到数据库");
+            log.info(">>>客户端已成功下载升级包,结果已记录到数据库表[wp.wp_device_upgrade_record]");
             //开始异步查询升级结果
             new Thread( QueryUpgradeResult.builder()
                     .deviceId(curDeviceId)
@@ -249,9 +253,9 @@ public class InteractionUtil {
             return RECEIVE_FILE_COMPLETED.getBytes();
         } else if (resultStr.contains(MD5_VALIDATION_FAILED)) {
             try {
-                throw new Exception("文件md5校验失败");
+                throw new RuntimeException("文件md5校验失败");
             } catch (Exception e) {
-                e.printStackTrace();
+                log.info( ExceptionUtil.getStackTraceString(e));
             }
         }
         return null;
@@ -274,7 +278,7 @@ public class InteractionUtil {
             byte[] dataByte = dataBuf.toString().getBytes();
             resultByte = getCommonBytes(lengthByte, cmdByte, dataByte);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         return resultByte;
     }
@@ -297,7 +301,7 @@ public class InteractionUtil {
             byte[] cmdByte = intToByteArray(cmd);
             resultByte = getCommonBytes(lengthByte, cmdByte, fileBytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         return resultByte;
     }
@@ -325,16 +329,19 @@ public class InteractionUtil {
      * @return
      */
     public static FileInputStream uploadFile() {
-        if ("" == filePath || "" == fileName) {
+        if ("" == filePath || "" == FILE_NAME) {
             log.info(">文件路径或文件名不存在!");
             return null;
         }
-        log.info(">开始获取文件" + filePath + fileName);
+        log.info(">开始获取文件" + filePath + FILE_NAME);
         FileInputStream in = null;
         try {
-            in = new FileInputStream(file);
+            if(null==FILE){
+                throw new RuntimeException("升级文件流不存在!");
+            }
+            in = new FileInputStream(FILE);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         return in;
     }
@@ -357,8 +364,8 @@ public class InteractionUtil {
                 bytestream.write(bb, 0, ch);
                 ch = in.read(bb);
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         return bytestream.toByteArray();
     }
@@ -366,15 +373,16 @@ public class InteractionUtil {
     /**
      * 校验设备版本
      */
-    public static byte[] validateVersion(Integer deviceVersion) {
-        int currentVersion = Integer.valueOf(fileName.split("\\.")[0]);
-        if (currentVersion <= deviceVersion) {
-            log.info("没有新版本");
+    public static byte[] validateVersion(Integer deviceVersion,String deviceId) {
+        int newVersion = Integer.valueOf(FILE_NAME.split("\\.")[0]);
+        if (newVersion <= deviceVersion) {
+            log.info(">>>没有新版本");
             StringBuffer sb = new StringBuffer();
             return getBytesWithoutFile(CMD_VERSION_RESPONSE, sb.append("none"));
         }
-        log.info("有可升级版本:" + currentVersion);
-        CUR_NEW_VERSION=String.valueOf(currentVersion);
+        log.info("有可升级版本:" + newVersion);
+        String[] infoArr=deviceQueue.get(deviceId);
+        infoArr[1]=String.valueOf(newVersion);
         return null;
     }
 
@@ -416,8 +424,7 @@ public class InteractionUtil {
      */
     public byte[] answerUpgrdeRequest(Integer cmd, StringBuffer sb) {
         log.info(">应答升级文件请求-请求指令[" + Integer.toHexString(cmd) + "]应答指令[" + Integer.toHexString(CMD_UPGRADE_RESPONSE) + "]");
-        CUR_RESP_CMD=Integer.toHexString(CMD_UPGRADE_RESPONSE);
-        log.info("接收DATA:"+sb.toString());
+        log.info("接收DATA:"+"\n"+sb.toString());
         String origStr = sb.toString();
         String[] origStrArr = origStr.split("\n");
         if ("none".equalsIgnoreCase(origStrArr[2].split(":")[1])) {
@@ -437,7 +444,7 @@ public class InteractionUtil {
                 .append(":")
                 .append(caculateMD5(uploadFile()))
                 .append("\n");
-        log.info("应答报文:"+sb.toString());
+        log.info("应答报文:"+"\n"+sb.toString());
         return getBytesWithoutFile(CMD_UPGRADE_RESPONSE, dataBuf);
     }
 
@@ -448,8 +455,7 @@ public class InteractionUtil {
      */
     public byte[] answerUpgradeResultRequest(Integer cmd, StringBuffer dataBuf) {
         log.info(">应答升级文件请求-请求指令[" + Integer.toHexString(cmd) + "]应答指令[" + Integer.toHexString(CMD_UPGRADE_RESULT_RESPONSE) + "]");
-        CUR_RESP_CMD=Integer.toHexString(CMD_UPGRADE_RESULT_RESPONSE);
-        log.info("接收DATA:"+dataBuf.toString());
+        log.info("接收DATA:"+"\n"+dataBuf.toString());
         String origStr = dataBuf.toString();
         String[] origStrArr = origStr.split("\n");
         StringBuffer dataSb = new StringBuffer();
@@ -461,7 +467,7 @@ public class InteractionUtil {
                 .append(":")
                 .append("ok")
                 .append("\n");
-        log.info("应答报文:"+dataSb.toString());
+        log.info("应答报文:"+"\n"+dataSb.toString());
         return getBytesWithoutFile(CMD_UPGRADE_RESULT_RESPONSE, dataSb);
     }
 
@@ -475,10 +481,8 @@ public class InteractionUtil {
         String md5 = "";
         try {
             md5 = DigestUtils.md5Hex(in);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         log.info(">计算文件md5值:" + md5);
         return md5;
@@ -511,9 +515,9 @@ class QueryUpgradeResult implements Runnable {
             try {
                 log.info("开始第" + (++seq) + "次查询设备["+this.deviceId+"]升级结果");
                 //五分钟后不再查询
-                if(time>5*60000){
+                if(time>3*60000){
                     running=false;
-                    log.info("设备["+this.deviceId+"]下载完升级包重启后没有上报版本号");
+                    log.info("APP端[摄像头wifi上线数据同步]接口没有获取到设备["+this.deviceId+"]升级重启后上报的版本号");
                     break;
                 }
                 time=time+30000;
@@ -523,17 +527,15 @@ class QueryUpgradeResult implements Runnable {
                 log.info(">>>当前设备[" + this.deviceId + "]上报版本[" + pushVersion + "]");
                 if(StringUtils.isNotEmpty(pushVersion)){
                     if (pushVersion.equals(this.newVersion)) {
-                        DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 0);
                         log.info(">>>设备["+this.deviceId +"]升级成功!");
                     } else {
-                        DeviceUtil.builder().build().updateUpgradeResult(this.deviceId, 4);
                         log.info("设备升级重启后上报不符合预期的版本["+pushVersion+"]");
                     }
                     running = false;
                     break;
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.info( ExceptionUtil.getStackTraceString(e));
             }
         }
     }

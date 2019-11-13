@@ -1,5 +1,6 @@
 package com.gzrock.server;
 
+import com.gzrock.data.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,7 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
+import java.util.*;
 
 import static com.sun.corba.se.impl.orbutil.ORBUtility.bytesToInt;
 
@@ -27,61 +28,67 @@ public class UpgradeServer {
      * @param args
      */
     private static void validationParams(String[] args) {
-        if (null == args[1] || "".equals(args[1])) {//还要有格式校验
+        //还要有格式校验
+        if (null == args[1] || "".equals(args[1])) {
             try {
-                throw new Exception("文件路径不能为空");
+                throw new RuntimeException("文件路径不能为空");
             } catch (Exception e) {
-                e.printStackTrace();
+                log.info( e.getMessage());
             }
         }
-        //文件名匹配正则校验
+       /* //文件名匹配正则校验
         if (null == args[2] || "".equals(args[2]) || !args[2].contains("tar.bz2")) {
             try {
-                throw new Exception("文件名不能为空并且文件名必须符合此格式:[504.app.C_800.tar.bz2]");
+                throw new RuntimeException("文件名不能为空并且文件名必须符合此格式:[504.app.C_800.tar.bz2]");
             } catch (Exception e) {
-                e.printStackTrace();
+                log.info( e.getMessage());
             }
-        }
+        }*/
     }
 
     /**
      * 文件路径和名称校验
-     *
      * @param filePath
-     * @param fileName
      */
-    private static void uploadFile(String filePath, String fileName) {
+    private static void uploadFile(String filePath) {
         InteractionUtil.filePath = filePath;
-        InteractionUtil.fileName = fileName;
-        InteractionUtil.currentVersion = Integer.valueOf(fileName.split("\\.")[0]);
-        InteractionUtil.file = new File(filePath + fileName);
-        if (null == InteractionUtil.file) {
+        File[] fileList = new File(filePath).listFiles();
+        if(null==fileList||0==fileList.length){
             try {
-                throw new Exception("升级文件不存在!请重新检查!");
+                log.info(">>没有升级文件包!!!");
             } catch (Exception e) {
-                e.printStackTrace();
+                log.info( ExceptionUtil.getStackTraceString(e));
             }
         }
+       List<Integer> versionList=new ArrayList(fileList.length);
+       Map<Integer,String> fileMap=new HashMap<>();
+        for (File file : fileList) {
+            String name=file.getName();
+            String[] nameArr=name.split("\\.");
+            Integer version=Integer.valueOf(nameArr[0]);
+            versionList.add(version);
+            fileMap.put(version,name);
+        }
+        String fileName= InteractionUtil.FILE_NAME=fileMap.get(Collections.max(versionList));
+        InteractionUtil.FILE=new File(filePath+fileName);
         log.info("升级包:" + filePath + fileName);
     }
 
     /**
      * 入口
-     *
      * @param args
-     * @throws Exception
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Assert.assertNotNull(args);
         validationParams(args);
-        uploadFile(args[1], args[2]);
+        uploadFile(args[1]);
         ServerSocket serverSocket = null;
         try {
-            /* 新建一个服务端ServerSocket,端口号为8888 */
+            /* 新建一个服务端ServerSocket */
             serverSocket = new ServerSocket(Integer.valueOf(args[0]));
             log.info("等待客户端连接!");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
         while (true) {
             try {
@@ -94,7 +101,7 @@ public class UpgradeServer {
                 //开始客户端发送信息线程
                 // new Thread(new SendThreat(socket)).start();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.info( ExceptionUtil.getStackTraceString(e));
             }
         }
     }
@@ -122,7 +129,7 @@ class ReceiveThread implements Runnable {
             running = true;
             readable = true;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
     }
 
@@ -202,28 +209,28 @@ class ReceiveThread implements Runnable {
                         writer.close();
 
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        log.info( ExceptionUtil.getStackTraceString(ex));
                     }
                     assert reader != null;
                     try {
                         reader.close();
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        log.info(ex.getMessage());
                     } finally {
                         assert writer != null;
                         try {
                             writer.close();
                         } catch (IOException ex) {
-                            ex.printStackTrace();
+                           log.info(ex.getMessage());
                         }
                         assert reader != null;
                         try {
                             reader.close();
                         } catch (IOException ex) {
-                            ex.printStackTrace();
+                            log.info(ex.getMessage());
                         }
                     }
-                    e.printStackTrace();
+                    log.info( e.getMessage());
                 }
             }
         }
@@ -265,7 +272,7 @@ class ReceiveThread implements Runnable {
             byte[] buf = new byte[sendBytes.length - 8];
             System.arraycopy(sendBytes, 8, buf, 0, sendBytes.length - 8);
             String resultData = new String(buf);
-            log.info(">>>resultData:" + resultData);
+            log.info(">>>resultData:"+"\n" + resultData);
             if (resultData.equals("none")) {
                 closeForNoUpgradeVersion(writer, reader);
             }
@@ -278,7 +285,7 @@ class ReceiveThread implements Runnable {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
     }
 
@@ -294,7 +301,7 @@ class ReceiveThread implements Runnable {
             writer.flush();
             log.info("^_^发送成功,本次交互完成鸟^_^");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info( ExceptionUtil.getStackTraceString(e));
         }
     }
 
